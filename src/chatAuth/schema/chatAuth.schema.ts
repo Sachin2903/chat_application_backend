@@ -6,6 +6,9 @@ export class ChatAuth {
     @Prop(({ type: String, required: true }))
     userId: string
 
+    @Prop(({ type: String, default:"" }))
+    profile: string
+
     @Prop(({ type: String, required: true }))
     name: string
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller,Headers, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
@@ -7,14 +7,17 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
 
-  @Post()
+  @Post('/createconversation')
   create(@Body() createConversationDto: CreateConversationDto) {
     return this.conversationService.create(createConversationDto);
   }
 
-  @Get()
-  findAll() {
-    return this.conversationService.findAll();
+  @Get("/all-conversation")
+  getAllConversation(@Headers('authorization') authHeader: string) {
+    if(!authHeader.slice(7).trim()||authHeader.slice(7).trim().length<=20){
+      throw new HttpException("Header missing ..",HttpStatus.BAD_REQUEST)
+    }
+    return this.conversationService.findAllConversation(authHeader.slice(7).trim());
   }
 
   @Get(':id')

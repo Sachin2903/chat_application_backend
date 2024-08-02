@@ -6,6 +6,9 @@ export class Message{
    parentMessage:string|null
 
    @Prop({type:String})
+   messageId:string;
+
+   @Prop({type:String})
    conversationId:string;
 
    @Prop({type:String})
@@ -17,7 +20,7 @@ export class Message{
    @Prop({type:String})
    messageContent:string;
 
-   @Prop({type:Number,default:0})
+   @Prop({type:Number,enum: [0, 1, 2, 3],default:0})
    status:number
 
 }

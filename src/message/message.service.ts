@@ -11,9 +11,25 @@ export class MessageService {
 
   async makeAllConversationStatusSend(userId:string) {
     try {
-      // await this.messageModel.updateMany({to_userId:userId}, {$set:{status:1}})
+      await this.messageModel.updateMany({to_userId:userId}, {$set:{status:1}})
     } catch (error) {
       console.log(error, "fail to update message status to send")
+    }
+  }
+
+  async addConversationMessage(createMessageDto:CreateMessageDto) {
+    try {
+      await this.messageModel.create(createMessageDto)
+    } catch (error) {
+      console.log(error, "fail to add message")
+    }
+  }
+
+  async makeConversationMessageSeen(conversationId:string,to_userId:string) {
+    try {
+      await this.messageModel.updateMany({conversationId,to_userId},{$set:{status:2}})
+    } catch (error) {
+      console.log(error, "fail to make message seen")
     }
   }
   create(createMessageDto: CreateMessageDto) {

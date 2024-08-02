@@ -9,11 +9,9 @@ export class ChatAuthService {
   constructor(@InjectModel(ChatAuth.name) private chatAuthModel: mongoose.Model<ChatAuth>) { }
 
 
-  async CheckAndUpdateUser(userId: string, socketId: string) {
+  async CheckAndUpdateUser(userId: string, updateAuthDto:UpdateChatAuthDto) {
     try {
-      // await this.chatAuthModel.findByIdAndUpdate(userId,{$set:{sId:socketId,status:true}},{new:true,upsert:true})
-
-
+      await this.chatAuthModel.findOneAndUpdate({userId},{$set:updateAuthDto},{new:true,upsert:true})
     } catch (error) {
       console.log(error, "unable to create user")
     }
@@ -21,8 +19,7 @@ export class ChatAuthService {
 
   async changeUserOnlineStatus(socketId: string,date:Date) {
     try {
-      // await this.chatAuthModel.findOneAndUpdate({sId:socketId},{$set:{lastSeen:date,status:false}})
-
+      await this.chatAuthModel.findOneAndUpdate({sId:socketId},{$set:{lastSeen:date,status:false}})
     } catch (error) {
       console.log(error, "unable to make user offline/disconnected")
     }
