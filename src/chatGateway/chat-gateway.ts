@@ -64,9 +64,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleMessage(client: Socket, @MessageBody() messageObject: CreateMessageDto): Promise<void> {
         const toSocketId = messageObject?.toSocketId
         delete messageObject.toSocketId
-        client.to(toSocketId).emit("receive - message", { messageObject: messageObject })
-        await this.messageService.addConversationMessage(messageObject)
-        await this.conversationService.updateConversationUpdatedAt(messageObject?.conversationId)
+        client.to(toSocketId).emit("receive-message", { messageObject: messageObject })
+        await Promise.all([this.messageService.addConversationMessage(messageObject),this.conversationService.updateConversationUpdatedAt(messageObject?.conversationId)])
     }
 
     @SubscribeMessage('chat-message-seen')
