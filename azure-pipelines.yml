@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- develop
+- prod
+
+pool: Default
+
+variables:
+  - name: MajorVersion
+    value: 0
+  - name: Version.MajorMinor
+    value: $(MajorVersion).1
+  - name: Version.Revision
+    value: $[counter(variables['Version.MajorMinor'], 0)]
+  - name: Version
+    ${{ if eq( variables['Build.SourceBranchName'], 'prod' ) }}: 
+      value: $(Version.MajorMinor).$(Version.Revision)p
+    ${{ if ne( variables['Build.SourceBranchName'], 'prod' ) }}: 
+      value: $(Version.MajorMinor).$(Version.Revision)
+  - name: Push
+    value: ${{ or(contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'prod')) }}
+  - name: AppName
+    value: omnichat-be
+  - name: Image.Name
+    value: omnileadz/$(AppName)
+
+
+steps:
+- task: Docker@2
+  displayName: "Build and publish docker image to container registery" 
+  inputs:
+    containerRegistry: 'OmnileadzDockerHub'
+    repository: $(Image.Name)
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: $(Version)
