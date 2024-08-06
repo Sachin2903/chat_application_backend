@@ -59,10 +59,15 @@ export class ConversationService {
           }
         },
         {
+          $addFields: {
+            conversationIdString: { $toString: "$_id" }
+          }
+        },
+        {
           $lookup: {
             from: 'messages',
             localField: 'conversationId',
-            foreignField: '_id',
+            foreignField:"conversationIdString" ,
             as: 'messages'
           }
         },
@@ -76,6 +81,7 @@ export class ConversationService {
             }
           }
         },
+        
       ])
 
     } catch (error) {
