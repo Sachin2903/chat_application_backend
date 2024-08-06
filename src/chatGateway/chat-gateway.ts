@@ -55,6 +55,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             const date = new Date()
             client.broadcast.emit("offline-disconnect", { socketId: client.id, lastSeen: date })
             await this.chatAuthService.changeUserOnlineStatus(client.id, date)
+        }{
+            console.log("invalid client Id When Disconnect")
         }
         console.log(`Client disconnected: ${client.id}`);
     }
@@ -65,7 +67,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const messageObjectParse = JSON.parse(messageObject)
         const toSocketId = messageObjectParse?.toSocketId.toString()
         delete messageObjectParse.toSocketId
-        console.log(toSocketId, typeof toSocketId, "to socket id", messageObjectParse?.toSocketId)
         if (toSocketId) {
             this.server.to(toSocketId).emit("receive-message", messageObject);
         } else {
