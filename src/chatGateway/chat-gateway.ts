@@ -55,7 +55,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             const date = new Date()
             client.broadcast.emit("offline-disconnect", { socketId: client.id, lastSeen: date })
             await this.chatAuthService.changeUserOnlineStatus(client.id, date)
-        }{
+        } {
             console.log("invalid client Id When Disconnect")
         }
         console.log(`Client disconnected: ${client.id}`);
@@ -64,28 +64,26 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('chat-message')
     async handleMessage(client: Socket, @MessageBody() messageObject): Promise<void> {
-        const messageObjectParse = JSON.parse(messageObject)
-        const toSocketId = messageObjectParse?.toSocketId.toString()
-        delete messageObjectParse.toSocketId
+        const toSocketId = messageObject?.toSocketId.toString()
+        delete messageObject.toSocketId
         if (toSocketId) {
             this.server.to(toSocketId).emit("receive-message", messageObject);
         } else {
             console.error("toSocketId is not defined");
         }
-        await Promise.all([this.messageService.addConversationMessage(messageObjectParse), this.conversationService.updateConversationUpdatedAt(messageObjectParse?.conversationId)])
+        await Promise.all([this.messageService.addConversationMessage(messageObject), this.conversationService.updateConversationUpdatedAt(messageObject?.conversationId)])
     }
 
     @SubscribeMessage('chat-typing')
-    async handleMessageTyping(client: Socket, @MessageBody() typingObject): Promise<void> {
-        const typingObjectParse: {
-            conversationId: string, userId: string;
-            to_userId_socketId: string
-        } = JSON.parse(typingObject)
-        if (typingObjectParse?.to_userId_socketId) {
-            const toSendObject = { ...typingObjectParse }
+    async handleMessageTyping(client: Socket, @MessageBody() typingObject: {
+        conversationId: string, userId: string;
+        to_userId_socketId: string
+    }): Promise<void> {
+        if (typingObject?.to_userId_socketId) {
+            const toSendObject = { ...typingObject }
             delete toSendObject.to_userId_socketId
-            this.server.to(typingObjectParse?.to_userId_socketId).emit("server-chat-typing", toSendObject)
-            await this.chatAuthService.changeTypingStatus({ conversationId: typingObjectParse?.conversationId, userId: typingObjectParse?.userId, status: true })
+            this.server.to(typingObject?.to_userId_socketId).emit("server-chat-typing", toSendObject)
+            await this.chatAuthService.changeTypingStatus({ conversationId: typingObject?.conversationId, userId: typingObject?.userId, status: true })
         } else {
             console.log("Invalid to_userId_socketId  value")
         }
@@ -93,38 +91,32 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('chat-stop-typing')
-    async handleMessageStopTyping(client: Socket, @MessageBody() typingObject): Promise<void> {
-        const typingObjectParse: {
-            conversationId: string, userId: string;
-            to_userId_socketId: string
-        } = JSON.parse(typingObject)
-        if (typingObjectParse?.to_userId_socketId) {
-            const toSendObject = { ...typingObjectParse }
+    async handleMessageStopTyping(client: Socket, @MessageBody() typingObject: {
+        conversationId: string, userId: string;
+        to_userId_socketId: string
+    }): Promise<void> {
+        if (typingObject?.to_userId_socketId) {
+            const toSendObject = { ...typingObject }
             delete toSendObject.to_userId_socketId
-            this.server.to(typingObjectParse?.to_userId_socketId).emit("server-chat-stop-typing", toSendObject)
-            await this.chatAuthService.changeTypingStatus({ conversationId: typingObjectParse?.conversationId, userId: typingObjectParse?.userId, status: false })
-        }else {
+            this.server.to(typingObject?.to_userId_socketId).emit("server-chat-stop-typing", toSendObject)
+            await this.chatAuthService.changeTypingStatus({ conversationId: typingObject?.conversationId, userId: typingObject?.userId, status: false })
+        } else {
             console.log("Invalid to_userId_socketId  value")
         }
-        
+
     }
 
     @SubscribeMessage('chat-message-seen')
-    async messageSeen(client: Socket, @MessageBody() messageSeenObject): Promise<void> {
-        const messageSeenObjectParse: { to_userId: string, conversationId: string, from_socketId: string }=JSON.parse(messageSeenObject)
-        const socketId = messageSeenObjectParse?.from_socketId
-        delete messageSeenObjectParse?.from_socketId
+    async messageSeen(client: Socket, @MessageBody() messageSeenObject: { to_userId: string, conversationId: string, from_socketId: string }): Promise<void> {
+        const socketId = messageSeenObject?.from_socketId
+        delete messageSeenObject?.from_socketId
 
-        if(socketId){
+        if (socketId) {
             this.server.to(socketId).emit("chat-message-seen-server", messageSeenObject)
-            await this.messageService.makeConversationMessageSeen(messageSeenObjectParse?.conversationId, messageSeenObjectParse?.to_userId)
-        }else{
+            await this.messageService.makeConversationMessageSeen(messageSeenObject?.conversationId, messageSeenObject?.to_userId)
+        } else {
             console.log("invalid socket id")
         }
-        
     }
-
-
-
 }
 
