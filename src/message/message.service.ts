@@ -20,6 +20,7 @@ export class MessageService {
   async addConversationMessage(createMessageDto:CreateMessageDto) {
     try {
       await this.messageModel.create(createMessageDto)
+      console.log("conversation message added successfully")
     } catch (error) {
       console.log(error, "fail to add message")
     }

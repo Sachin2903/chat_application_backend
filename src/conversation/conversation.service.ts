@@ -87,8 +87,9 @@ export class ConversationService {
   async updateConversationUpdatedAt(conversationId) {
     try {
       await this.conversationModel.findByIdAndUpdate(conversationId, { updatedAt: new Date() })
+      console.log("updated conversation updateAt value")
     } catch (error) {
-      console.log(error, "fail to update updatedAt")
+      console.log(error, "fail to update updatedAt in conversation")
     }
   }
 
