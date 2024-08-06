@@ -35,7 +35,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
                 client.disconnect();
             } else {
                 console.log(`Client connected: ${client.id}`);
-                client.broadcast.emit("online-connected", { userId: decodeToken?.Id, socketId: client.id ,type: decodeToken?.authorities[0] ? decodeToken?.authorities[0] : "UNKNOWN",})
+                client.broadcast.emit("online-connected", { userId: decodeToken?.Id, socketId: client.id, type: decodeToken?.authorities[0] ? decodeToken?.authorities[0] : "UNKNOWN", })
 
                 await Promise.all([this.chatAuthService.CheckAndUpdateUser(decodeToken?.Id, {
                     sId: client.id,
@@ -55,7 +55,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             const date = new Date()
             client.broadcast.emit("offline-disconnect", { socketId: client.id, lastSeen: date })
             await this.chatAuthService.changeUserOnlineStatus(client.id, date)
-        } {
+        }else {
             console.log("invalid client Id When Disconnect")
         }
         console.log(`Client disconnected: ${client.id}`);
