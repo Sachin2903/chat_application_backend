@@ -65,7 +65,33 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const toSocketId = messageObject?.toSocketId
         delete messageObject.toSocketId
         client.to(toSocketId).emit("receive-message", { messageObject: messageObject })
-        await Promise.all([this.messageService.addConversationMessage(messageObject),this.conversationService.updateConversationUpdatedAt(messageObject?.conversationId)])
+        await Promise.all([this.messageService.addConversationMessage(messageObject), this.conversationService.updateConversationUpdatedAt(messageObject?.conversationId)])
+    }
+
+    @SubscribeMessage('chat-typing')
+    async handleMessageTyping(client: Socket, @MessageBody() typingObject: {
+        conversationId: string, userId: string;
+        to_userId_socketId: string
+    }): Promise<void> {
+        if (typingObject?.to_userId_socketId) {
+            const toSendObject = { ...typingObject }
+            delete toSendObject.to_userId_socketId
+            client.to(typingObject?.to_userId_socketId).emit("server-chat-typing",toSendObject)
+        }
+        await this.conversationService.updateConversationTypingStatus({ ...typingObject, status: true })
+    }
+
+    @SubscribeMessage('chat-stop-typing')
+    async handleMessageStopTyping(client: Socket, @MessageBody() typingObject: {
+        conversationId: string, userId: string;
+        to_userId_socketId: string
+    }): Promise<void> {
+        if (typingObject?.to_userId_socketId) {
+            const toSendObject = { ...typingObject }
+            delete toSendObject.to_userId_socketId
+            client.to(typingObject?.to_userId_socketId).emit("server-chat-stop-typing",toSendObject)
+        }
+        await this.conversationService.updateConversationTypingStatus({ ...typingObject, status: false })
     }
 
     @SubscribeMessage('chat-message-seen')

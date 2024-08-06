@@ -1,5 +1,6 @@
 export class CreateConversationDto {
     userId:string;
     serviceUserId:string;
-    conversationStatus:number
+    conversationStatus:number;
+    conversationTyping:object
 }

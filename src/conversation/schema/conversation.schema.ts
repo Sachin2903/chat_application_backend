@@ -8,6 +8,9 @@ export class Conversation{
     @Prop({type:String,required:true})
     serviceUserId:string;
 
+    @Prop({type:Object,default:{}})
+    conversationTyping:object
+
     @Prop({type:Number,default:0})
     conversationStatus:number
 
