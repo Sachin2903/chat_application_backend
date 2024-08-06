@@ -6,7 +6,7 @@ export class ChatAuth {
     @Prop(({ type: String, required: true }))
     userId: string
 
-    @Prop(({ type: String, default:"" }))
+    @Prop(({ type: String, default: "" }))
     profile: string
 
     @Prop(({ type: String, required: true }))
@@ -18,7 +18,7 @@ export class ChatAuth {
     @Prop(({ type: String, required: true }))
     sId: string
 
-    @Prop(({ type: Date, default : new Date() }))
+    @Prop(({ type: Date, default: new Date() }))
     lastSeen: Date
 
     @Prop(({ type: String }))
@@ -33,6 +33,9 @@ export class ChatAuth {
     @Prop(({ type: Boolean, default: true }))
     status: boolean
 
+    @Prop(({ type: Object, default: {} }))
+    ty_ing: object
+
 }
 
-export const ChatAuthSchema=SchemaFactory.createForClass(ChatAuth)
+export const ChatAuthSchema = SchemaFactory.createForClass(ChatAuth)

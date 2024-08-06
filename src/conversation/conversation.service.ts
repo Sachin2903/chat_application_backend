@@ -12,7 +12,7 @@ export class ConversationService {
     private readonly jwtService: JwtService,) { }
   async create(createConversationDto: CreateConversationDto) {
     try {
-      await this.conversationModel.findOneAndUpdate({ userId: createConversationDto.userId, serviceUserId: createConversationDto.serviceUserId }, { $set: { ...createConversationDto}}, { upsert: true })
+      await this.conversationModel.findOneAndUpdate({ userId: createConversationDto.userId, serviceUserId: createConversationDto.serviceUserId }, { $set: { ...createConversationDto } }, { upsert: true })
       console.log("a new connection created successfully")
     } catch (error) {
       const message = error.response && typeof error.response == "string" ? error.response : error.message && typeof error.message == "string" ? error.message : "Internal Server Error"
@@ -89,18 +89,6 @@ export class ConversationService {
       await this.conversationModel.findByIdAndUpdate(conversationId, { updatedAt: new Date() })
     } catch (error) {
       console.log(error, "fail to update updatedAt")
-    }
-  }
-
-  async updateConversationTypingStatus(typingObject: {
-    conversationId: string, userId: string;
-    to_userId_socketId: string,
-    status:boolean
-  }) {
-    try {
-      await this.conversationModel.findByIdAndUpdate(typingObject?.conversationId, {$set:{ [`conversationTyping.${typingObject?.userId}`]:Boolean(typingObject?.status)}})
-    } catch (error) {
-      console.log(error, "fail to update typing status")
     }
   }
 

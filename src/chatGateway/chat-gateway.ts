@@ -76,9 +76,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         if (typingObject?.to_userId_socketId) {
             const toSendObject = { ...typingObject }
             delete toSendObject.to_userId_socketId
-            client.to(typingObject?.to_userId_socketId).emit("server-chat-typing",toSendObject)
+            client.to(typingObject?.to_userId_socketId).emit("server-chat-typing", toSendObject)
         }
-        await this.conversationService.updateConversationTypingStatus({ ...typingObject, status: true })
+        await this.chatAuthService.changeTypingStatus({ conversationId: typingObject?.conversationId, userId: typingObject?.userId, status: true })
     }
 
     @SubscribeMessage('chat-stop-typing')
@@ -89,9 +89,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         if (typingObject?.to_userId_socketId) {
             const toSendObject = { ...typingObject }
             delete toSendObject.to_userId_socketId
-            client.to(typingObject?.to_userId_socketId).emit("server-chat-stop-typing",toSendObject)
+            client.to(typingObject?.to_userId_socketId).emit("server-chat-stop-typing", toSendObject)
         }
-        await this.conversationService.updateConversationTypingStatus({ ...typingObject, status: false })
+        await this.chatAuthService.changeTypingStatus({ conversationId: typingObject?.conversationId, userId: typingObject?.userId, status: false })
     }
 
     @SubscribeMessage('chat-message-seen')

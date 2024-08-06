@@ -9,22 +9,36 @@ export class ChatAuthService {
   constructor(@InjectModel(ChatAuth.name) private chatAuthModel: mongoose.Model<ChatAuth>) { }
 
 
-  async CheckAndUpdateUser(userId: string, updateAuthDto:UpdateChatAuthDto) {
+  async CheckAndUpdateUser(userId: string, updateAuthDto: UpdateChatAuthDto) {
     try {
-      await this.chatAuthModel.findOneAndUpdate({userId},{$set:updateAuthDto},{new:true,upsert:true})
+      await this.chatAuthModel.findOneAndUpdate({ userId }, { $set: updateAuthDto }, { new: true, upsert: true })
     } catch (error) {
       console.log(error, "unable to create user")
     }
   }
 
-  async changeUserOnlineStatus(socketId: string,date:Date) {
+  async changeUserOnlineStatus(socketId: string, date: Date) {
     try {
-      await this.chatAuthModel.findOneAndUpdate({sId:socketId},{$set:{lastSeen:date,status:false}})
+      await this.chatAuthModel.findOneAndUpdate({ sId: socketId }, { $set: { lastSeen: date, status: false,ty_ing:{} } })
     } catch (error) {
       console.log(error, "unable to make user offline/disconnected")
     }
-
   }
+
+  async changeTypingStatus({ conversationId, userId, status }: { conversationId: string, userId: string, status: boolean }) {
+    try {
+      if (status) {
+        await this.chatAuthModel.findByIdAndUpdate(userId, { $set: { ty_ing: { [`${conversationId?.toString()}`]: true } } })
+      } else {
+        await this.chatAuthModel.findByIdAndUpdate(userId, { $set: { ty_ing: {} } })
+      }
+    } catch (error) {
+      console.log(error, "unable to change typing status")
+    }
+  }
+
+  
+
   create(createAuthDto: CreateChatAuthDto) {
     return 'This action adds a new auth';
   }
