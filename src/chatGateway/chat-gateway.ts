@@ -59,6 +59,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             console.log("invalid client Id When Disconnect")
         }
         console.log(`Client disconnected: ${client.id}`);
+
+
+
     }
 
 
@@ -66,6 +69,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleMessage(client: Socket, @MessageBody() messageObject): Promise<void> {
         const toSocketId = messageObject?.toSocketId.toString()
         delete messageObject.toSocketId
+        
         if (toSocketId) {
             this.server.to(toSocketId).emit("receive-message", messageObject);
         } else {
@@ -87,7 +91,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         } else {
             console.log("Invalid to_userId_socketId  value")
         }
-
     }
 
     @SubscribeMessage('chat-stop-typing')
