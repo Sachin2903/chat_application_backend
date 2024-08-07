@@ -11,7 +11,7 @@ export class MessageService {
 
   async makeAllConversationStatusSend(userId:string) {
     try {
-      await this.messageModel.updateMany({to_userId:userId}, {$set:{status:1}})
+      await this.messageModel.updateMany({to_userId:userId,status:0}, {$set:{status:1}})
     } catch (error) {
       console.log(error, "fail to update message status to send")
     }
