@@ -29,6 +29,7 @@ export class MessageService {
   async makeConversationMessageSeen(conversationId:string,to_userId:string) {
     try {
       await this.messageModel.updateMany({conversationId,to_userId},{$set:{status:2}})
+      console.log("status of message has been changes to read")
     } catch (error) {
       console.log(error, "fail to make message seen")
     }
