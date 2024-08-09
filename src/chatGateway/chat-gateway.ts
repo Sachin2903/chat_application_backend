@@ -114,7 +114,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const socketId = messageSeenObject?.from_socketId
         delete messageSeenObject?.from_socketId
 
-        if (socketId) {
+        if (!socketId) {
             this.server.to(socketId).emit("chat-message-seen-server", messageSeenObject)
             await this.messageService.makeConversationMessageSeen(messageSeenObject?.conversationId, messageSeenObject?.to_userId)
         } else {
