@@ -89,7 +89,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             this.server.to(typingObject?.to_userId_socketId).emit("server-chat-typing", toSendObject)
             await this.chatAuthService.changeTypingStatus({ conversationId: typingObject?.conversationId, userId: typingObject?.userId, status: true })
         } else {
-            console.log("Invalid to_userId_socketId  value")
+            console.log("Invalid to_userId_socketId  value  in chat typing")
         }
     }
 
@@ -104,7 +104,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             this.server.to(typingObject?.to_userId_socketId).emit("server-chat-stop-typing", toSendObject)
             await this.chatAuthService.changeTypingStatus({ conversationId: typingObject?.conversationId, userId: typingObject?.userId, status: false })
         } else {
-            console.log("Invalid to_userId_socketId  value")
+            console.log("Invalid to_userId_socketId  value when stop chat typing")
         }
 
     }
