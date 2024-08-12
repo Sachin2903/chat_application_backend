@@ -8,7 +8,7 @@ import { CreateMessageDto } from 'src/message/dto/create-message.dto';
 import { ConversationService } from 'src/conversation/conversation.service';
 
 const port = 3636;
-@WebSocketGateway({ cors: { origin: "*", method: ["GET", "POST"], credentials: true } })
+@WebSocketGateway({ cors: { origin: "*", method: ["GET", "POST"], credentials: true } , port: port})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly jwtService: JwtService,
         @Inject(ChatAuthService) private readonly chatAuthService: ChatAuthService,
