@@ -6,10 +6,13 @@ import { ChatAuthService } from 'src/chatAuth/chatAuth.service';
 import { MessageService } from 'src/message/message.service';
 import { CreateMessageDto } from 'src/message/dto/create-message.dto';
 import { ConversationService } from 'src/conversation/conversation.service';
+import { changeDecodeAccessTokenFunction } from './chnageDecodeAccessTokenFunction';
 
 const port = 3636;
-@WebSocketGateway({ cors: { origin: "*", method: ["GET", "POST"], credentials: true } , port: port, transports: ['websocket'],
-    secure: true})
+@WebSocketGateway({
+    cors: { origin: "*", method: ["GET", "POST"], credentials: true }, port: port, transports: ['websocket'],
+    secure: true
+})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly jwtService: JwtService,
         @Inject(ChatAuthService) private readonly chatAuthService: ChatAuthService,
@@ -24,29 +27,31 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     async handleConnection(client: Socket, ...args: any[]) {
-        const access_token = client.handshake.headers['authorization'];
+        console.log("Connection request received");
+        const access_token = client.handshake.auth['token'];
+        const queryParams = client.handshake.query;
         if (!access_token) {
-            console.log(`Client disconnected: ${client.id} Due to invalid accessToken`)
+            console.log(`Client disconnected: ${client.id} Due to invalid accessToken customer: ${queryParams.fm}`)
             client.disconnect();
         } else {
             const decodeToken: any = await this.jwtService.decode(access_token as string)
-            console.log(decodeToken)
-            if (!decodeToken?.sub || !decodeToken?.Id) {
+            const requiredDecodedToken = changeDecodeAccessTokenFunction.hasOwnProperty(queryParams?.fm as string) ? changeDecodeAccessTokenFunction[queryParams?.fm as string](decodeToken) : decodeToken
+            if (!requiredDecodedToken?.email || !requiredDecodedToken?.sub) {
                 console.log(`Client disconnected: ${client.id} Due to invalid user Id`)
                 client.disconnect();
             } else {
-                console.log(`Client connected: ${client.id}`);
-                client.broadcast.emit("online-connected", { userId: decodeToken?.Id, socketId: client.id, type: decodeToken?.authorities[0] ? decodeToken?.authorities[0] : "UNKNOWN", })
+                console.log(`Client connected: ${client.id} | ${queryParams.fm}`);
+                client.broadcast.emit("online-connected", { userId: requiredDecodedToken?.sub, socketId: client.id, type: requiredDecodedToken?.role[0] ? requiredDecodedToken?.role[0] : "UNKNOWN", })
 
-                await Promise.all([this.chatAuthService.CheckAndUpdateUser(decodeToken?.Id, {
+                await Promise.all([this.chatAuthService.CheckAndUpdateUser(requiredDecodedToken?.sub, {
                     sId: client.id,
-                    type: decodeToken?.authorities[0] ? decodeToken?.authorities[0] : "UNKNOWN",
-                    source: decodeToken?.officeId,
+                    type: requiredDecodedToken?.role[0] ? requiredDecodedToken?.role[0] : "UNKNOWN",
+                    source: queryParams?.fm as string,
                     lastSeen: new Date(),
                     status: true,
-                    email: decodeToken?.sub,
-                    name: decodeToken?.name
-                }), this.messageService.makeAllConversationStatusSend(decodeToken?.Id)])
+                    email: requiredDecodedToken?.email,
+                    name: requiredDecodedToken?.name
+                }), this.messageService.makeAllConversationStatusSend(requiredDecodedToken?.sub)])
             }
         }
     }
@@ -56,13 +61,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             const date = new Date()
             client.broadcast.emit("offline-disconnect", { socketId: client.id, lastSeen: date })
             await this.chatAuthService.changeUserOnlineStatus(client.id, date)
-        }else {
+        } else {
             console.log("invalid client Id When Disconnect")
         }
         console.log(`Client disconnected: ${client.id}`);
-
-
-
     }
 
 
@@ -70,7 +72,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleMessage(client: Socket, @MessageBody() messageObject): Promise<void> {
         const toSocketId = messageObject?.toSocketId.toString()
         delete messageObject.toSocketId
-        
+
         if (toSocketId) {
             this.server.to(toSocketId).emit("receive-message", messageObject);
         } else {
@@ -115,7 +117,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const socketId = messageSeenObject?.from_socketId
         delete messageSeenObject?.from_socketId
 
-        if (socketId&&messageSeenObject?.to_userId) {
+        if (socketId && messageSeenObject?.to_userId) {
             this.server.to(socketId).emit("chat-message-seen-server", messageSeenObject)
             await this.messageService.makeConversationMessageSeen(messageSeenObject?.conversationId, messageSeenObject?.to_userId)
         } else {

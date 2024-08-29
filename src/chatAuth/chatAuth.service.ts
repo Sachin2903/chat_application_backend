@@ -19,7 +19,7 @@ export class ChatAuthService {
 
   async changeUserOnlineStatus(socketId: string, date: Date) {
     try {
-      await this.chatAuthModel.findOneAndUpdate({ sId: socketId }, { $set: { lastSeen: date, status: false,ty_ing:{} } })
+      await this.chatAuthModel.findOneAndUpdate({ sId: socketId }, { $set: { lastSeen: date, status: false, ty_ing: {} } })
     } catch (error) {
       console.log(error, "unable to make user offline/disconnected")
     }
@@ -28,16 +28,16 @@ export class ChatAuthService {
   async changeTypingStatus({ conversationId, userId, status }: { conversationId: string, userId: string, status: boolean }) {
     try {
       if (status) {
-        await this.chatAuthModel.findOneAndUpdate({userId:userId}, { $set: { ty_ing: { [`${conversationId?.toString()}`]: true } } })
+        await this.chatAuthModel.findOneAndUpdate({ userId: userId }, { $set: { ty_ing: { [`${conversationId?.toString()}`]: true } } })
       } else {
-        await this.chatAuthModel.findOneAndUpdate({userId:userId}, { $set: { ty_ing: {} } })
+        await this.chatAuthModel.findOneAndUpdate({ userId: userId }, { $set: { ty_ing: {} } })
       }
     } catch (error) {
       console.log(error, "unable to change typing status")
     }
   }
 
-  
+
 
   create(createAuthDto: CreateChatAuthDto) {
     return 'This action adds a new auth';
