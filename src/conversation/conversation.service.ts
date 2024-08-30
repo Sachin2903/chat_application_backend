@@ -28,7 +28,7 @@ export class ConversationService {
         throw new HttpException("Conflict in accessToken , UserId Not Found!", HttpStatus.FORBIDDEN)
       }
 
-      return await this.conversationModel.aggregate([
+     const conversation= await this.conversationModel.aggregate([
         { $match: { $or: [{ userId: userid }, { serviceUserId: userid }] } },
         { $sort: { updatedAt: -1 } },
         {
@@ -53,38 +53,41 @@ export class ConversationService {
             as: 'serviceUserDetails'
           }
         },
-        {
-          $unwind: {
-            path: '$serviceUserDetails',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $addFields: {
-            conversationIdString: { $toString: "$_id" }
-          }
-        },
-        {
-          $lookup: {
-            from: 'messages',
-            localField: 'conversationId',
-            foreignField: "conversationIdString",
-            as: 'messages'
-          }
-        },
-        {
-          $addFields: {
-            messages: {
-              $sortArray: {
-                input: '$messages',
-                sortBy: { createdAt: 1 }
-              }
-            }
-          }
-        },
+        // {
+        //   $unwind: {
+        //     path: '$serviceUserDetails',
+        //     preserveNullAndEmptyArrays: true
+        //   }
+        // },
+        // {
+        //   $addFields: {
+        //     conversationIdString: { $toString: "$_id" }
+        //   }
+        // },
+        // {
+        //   $lookup: {
+        //     from: 'messages',
+        //     localField: 'conversationId',
+        //     foreignField: "conversationIdString",
+        //     as: 'messages'
+        //   }
+        // },
+        // {
+        //   $addFields: {
+        //     messages: {
+        //       $sortArray: {
+        //         input: '$messages',
+        //         sortBy: { createdAt: 1 }
+        //       }
+        //     }
+        //   }
+        // },
 
       ])
 
+
+      console.log(conversation)
+      return []
     } catch (error) {
       const message = error.response && typeof error.response == "string" ? error.response : error.message && typeof error.message == "string" ? error.message : "Internal Server Error"
       throw new HttpException(message, HttpStatus.FORBIDDEN)
