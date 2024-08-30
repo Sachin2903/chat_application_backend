@@ -12,12 +12,9 @@ export class ConversationController {
     return this.conversationService.create(createConversationDto);
   }
 
-  @Get("/all-conversation")
-  getAllConversation(@Headers('authorization') authHeader: string) {
-    if(!authHeader.slice(7).trim()||authHeader.slice(7).trim().length<=20){
-      throw new HttpException("Header missing ..",HttpStatus.BAD_REQUEST)
-    }
-    return this.conversationService.findAllConversation(authHeader.slice(7).trim());
+  @Get("/all-conversation/:userid")
+  getAllConversation(@Param("userid") userid:string) {
+    return this.conversationService.findAllConversation(userid);
   }
 
   @Get(':id')

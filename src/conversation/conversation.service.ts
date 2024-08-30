@@ -10,25 +10,26 @@ import { JwtService } from '@nestjs/jwt';
 export class ConversationService {
   constructor(@InjectModel(Conversation.name) private conversationModel: mongoose.Model<Conversation>,
     private readonly jwtService: JwtService,) { }
+
   async create(createConversationDto: CreateConversationDto) {
     try {
-      await this.conversationModel.findOneAndUpdate({ userId: createConversationDto.userId, serviceUserId: createConversationDto.serviceUserId }, { $set: { ...createConversationDto } }, { upsert: true })
+      const conversation = await this.conversationModel.findOneAndUpdate({ userId: createConversationDto.userId, serviceUserId: createConversationDto.serviceUserId }, { $set: { ...createConversationDto } }, { upsert: true,new: true })
       console.log("a new connection created successfully")
+      return conversation?._id;
     } catch (error) {
       const message = error.response && typeof error.response == "string" ? error.response : error.message && typeof error.message == "string" ? error.message : "Internal Server Error"
       throw new HttpException(message, HttpStatus.FORBIDDEN)
     }
   }
 
-  async findAllConversation(accessToken: string) {
+  async findAllConversation(userid: string) {
     try {
-      const decodeToken: any = await this.jwtService.decode(accessToken as string)
-      if (!decodeToken?.Id) {
+      if (!userid) {
         throw new HttpException("Conflict in accessToken , UserId Not Found!", HttpStatus.FORBIDDEN)
       }
 
       return await this.conversationModel.aggregate([
-        { $match: { $or: [{ userId: decodeToken?.Id }, { serviceUserId: decodeToken?.Id }] } },
+        { $match: { $or: [{ userId: userid }, { serviceUserId: userid }] } },
         { $sort: { updatedAt: -1 } },
         {
           $lookup: {
@@ -67,7 +68,7 @@ export class ConversationService {
           $lookup: {
             from: 'messages',
             localField: 'conversationId',
-            foreignField:"conversationIdString" ,
+            foreignField: "conversationIdString",
             as: 'messages'
           }
         },
@@ -81,7 +82,7 @@ export class ConversationService {
             }
           }
         },
-        
+
       ])
 
     } catch (error) {

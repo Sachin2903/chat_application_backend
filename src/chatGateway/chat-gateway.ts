@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Inject } from '@nestjs/common';
 import { ChatAuthService } from 'src/chatAuth/chatAuth.service';
 import { MessageService } from 'src/message/message.service';
-import { CreateMessageDto } from 'src/message/dto/create-message.dto';
 import { ConversationService } from 'src/conversation/conversation.service';
 import { changeDecodeAccessTokenFunction } from './chnageDecodeAccessTokenFunction';
 
