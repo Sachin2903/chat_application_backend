@@ -108,8 +108,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         } else {
             console.log("Invalid to_userId_socketId  value when stop chat typing")
         }
-
     }
+
 
     @SubscribeMessage('chat-message-seen')
     async messageSeen(client: Socket, @MessageBody() messageSeenObject: { to_userId: string, conversationId: string, from_socketId: string }): Promise<void> {
